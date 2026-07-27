@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>提案企画書 自動作成エージェント｜デモ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#A51E6D; --primary-8:#EDD2E2; --primary-9:#F6E9F0;
+  --teal:#039578; --teal-9:#E6F4F2; --teal-8:#CDEAE4;
+  --n0:#333; --n1:#474747; --n2:#5C5C5C; --n3:#707070; --n5:#999;
+  --n7:#C2C2C2; --n8:#D6D6D6; --n9:#EBEBEB;
+  --danger:#C0392B; --danger-bg:#FFF6F5; --danger-bd:#F1C9C4;
+  --grad:linear-gradient(90deg,#FF5757 0%,#8C52FF 100%);
+  --font:'Noto Sans JP',-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic',sans-serif;
+  --shadow:0 4px 24px rgba(51,51,51,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font);color:var(--n0);background:#F7F6F7;letter-spacing:.02em;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none}
+/* ---------- 上部バー ---------- */
+.topbar{height:64px;background:#fff;border-bottom:1px solid var(--n9);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:20}
+.topbar img{height:28px}
+.topbar .app-title{font-size:16px;font-weight:700}
+.topbar .sep{width:1px;height:24px;background:var(--n9)}
+.topbar .demo-badge{margin-left:auto;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--n3);border:1px solid var(--n8);border-radius:999px;padding:6px 14px}
+.grad-line{height:4px;background:var(--grad)}
+/* ---------- レイアウト ---------- */
+.wrap{max-width:1240px;margin:0 auto;padding:32px 24px 80px}
+.pagehead{margin-bottom:24px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--primary);margin-bottom:8px}
+h1{font-size:28px;margin:0 0 8px;letter-spacing:-.01em}
+.sub{font-size:14px;color:var(--n3);margin:0}
+.card{background:#fff;border:1px solid var(--n9);border-radius:16px;box-shadow:var(--shadow)}
+.pad{padding:24px 28px}
+.grid2{display:grid;grid-template-columns:1fr 1.35fr;gap:24px;align-items:start}
+.label{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--n3);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.label .step{background:var(--primary);color:#fff;border-radius:999px;padding:3px 10px;font-size:11px;letter-spacing:.06em}
+.field{margin-bottom:22px}
+.field:last-child{margin-bottom:0}
+input[type=text],select,textarea{width:100%;font-family:inherit;font-size:14px;color:var(--n0);border:1px solid var(--n8);border-radius:8px;padding:11px 14px;background:#fff}
+input[type=text]:focus,select:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:1px;border-color:var(--primary)}
+textarea{min-height:340px;line-height:1.85;resize:vertical;font-size:13.5px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.filechips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:12.5px;padding:7px 14px;border-radius:999px;background:var(--primary-9);color:var(--primary);font-weight:500}
+.chip.n{background:var(--n9);color:var(--n2)}
+.btn{background:var(--primary);color:#fff;font-size:15px;font-weight:700;padding:14px 32px;border-radius:8px;letter-spacing:.04em;transition:filter .2s}
+.btn:hover{filter:brightness(.92)}
+.btn:disabled{background:var(--n7);cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--primary);border:2px solid var(--primary)}
+.btn.sm{font-size:13px;padding:9px 20px}
+.hint{font-size:12px;color:var(--n5);margin-top:10px;line-height:1.6}
+/* ---------- 生成中 ---------- */
+.gen{position:fixed;inset:0;background:rgba(255,255,255,.96);z-index:50;display:none;align-items:center;justify-content:center}
+.gen.on{display:flex}
+.gen-inner{width:520px}
+.gen-title{font-size:20px;font-weight:700;margin-bottom:28px;text-align:center}
+.gstep{display:flex;align-items:center;gap:14px;padding:13px 0;font-size:14px;color:var(--n7);transition:color .3s}
+.gstep .dot{width:22px;height:22px;border-radius:999px;border:2px solid var(--n8);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+.gstep.run{color:var(--n0);font-weight:700}
+.gstep.run .dot{border-color:var(--primary);border-right-color:transparent;animation:spin .8s linear infinite}
+.gstep.done{color:var(--n2)}
+.gstep.done .dot{background:var(--teal);border-color:var(--teal)}
+.gstep .t{flex:1}
+.gstep .ms{font-size:11.5px;color:var(--n5);font-weight:400}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar{height:4px;background:var(--n9);border-radius:999px;overflow:hidden;margin-top:24px}
+.bar i{display:block;height:100%;width:0;background:var(--grad);transition:width .4s ease}
+/* ---------- 結果 ---------- */
+.tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.tab{font-size:13.5px;font-weight:700;padding:11px 22px;border-radius:8px;background:#fff;color:var(--n3);border:1px solid var(--n9)}
+.tab.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab .badge{display:inline-block;margin-left:8px;background:var(--danger);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
+.tab.on .badge{background:rgba(255,255,255,.28)}
+.panel{display:none}
+.panel.on{display:block}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11.5px;letter-spacing:.1em;color:var(--n5);font-weight:700;padding:0 10px 10px;border-bottom:1px solid var(--n8)}
+td{padding:13px 10px;border-bottom:1px solid var(--n9);color:var(--n1);line-height:1.6;vertical-align:top}
+td.k{font-weight:700;color:var(--n0);white-space:nowrap;width:150px}
+td.src{color:var(--primary);font-weight:500;white-space:nowrap;width:90px;font-size:12.5px}
+tr.miss td{background:var(--danger-bg)}
+tr.miss td.k{color:var(--danger)}
+td.na{color:var(--danger);font-weight:700}
+.summary{display:flex;gap:32px;margin-bottom:22px;flex-wrap:wrap}
+.summary div{font-size:12px;color:var(--n3);line-height:1.5}
+.summary b{display:block;font-size:24px;color:var(--primary);letter-spacing:-.01em}
+.note{border-left:4px solid var(--primary);background:var(--primary-9);padding:14px 18px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7;margin-top:20px}
+.note b{color:var(--primary)}
+.alert{border:1px solid var(--danger-bd);background:var(--danger-bg);border-radius:12px;padding:16px 20px;margin-bottom:14px}
+.alert .t{font-size:15px;font-weight:700;color:var(--danger);margin-bottom:6px}
+.alert .q{font-size:13.5px;color:var(--n1);line-height:1.75}
+.alert .q em{font-style:normal;color:var(--primary);font-weight:700}
+.alert.ok{border-color:var(--teal-8);background:var(--teal-9)}
+.alert.ok .t{color:var(--teal)}
+.alert.ok strong{color:var(--teal)}
+/* ドラフト */
+.draft{display:grid;grid-template-columns:250px 1fr;gap:24px;align-items:start}
+.toc{list-style:none;margin:0;padding:0;font-size:13.5px}
+.toc li{padding:11px 14px;border-radius:8px;color:var(--n2);display:flex;gap:10px;align-items:baseline}
+.toc li b{color:var(--n5);font-size:11.5px}
+.toc li:hover{background:#FAFAFA}
+.toc li.on{background:var(--primary-9);color:var(--primary);font-weight:700}
+.toc li.on b{color:var(--primary)}
+.doc h3{font-size:20px;margin:0 0 14px}
+.doc h4{font-size:14px;color:var(--primary);margin:22px 0 8px}
+.doc p{font-size:14px;line-height:2;color:var(--n1);margin:0 0 12px;white-space:pre-wrap}
+.doc .mk{background:var(--teal-9);border-radius:3px;padding:0 3px}
+.caret{display:inline-block;width:2px;height:16px;background:var(--primary);vertical-align:-3px;animation:blink .9s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+/* カルテ一覧 */
+.search{display:flex;align-items:center;gap:10px;border:2px solid var(--primary);border-radius:999px;padding:0 20px;margin-bottom:8px;background:#fff}
+.search span{color:var(--primary);font-size:13px;font-weight:700}
+.search input{border:none;padding:13px 0;font-size:14px;flex:1;outline:none;font-family:inherit}
+.hit{font-size:12.5px;color:var(--teal);font-weight:700;margin:12px 0 14px;letter-spacing:.04em}
+.pill{font-size:11.5px;padding:3px 11px;border-radius:999px;font-weight:700;white-space:nowrap}
+.pill.win{background:var(--teal-9);color:var(--teal)}
+.pill.lose{background:var(--n9);color:var(--n3)}
+.tag{display:inline-block;font-size:11.5px;background:var(--primary-9);color:var(--primary);border-radius:6px;padding:3px 9px;margin:2px 4px 2px 0}
+.foot{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+@media (max-width:900px){.grid2,.draft{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="./logo_unit_color.png" alt="SHIFT AI">
+  <div class="sep"></div>
+  <div class="app-title">提案企画書ドラフト生成エージェント</div>
+  <div class="demo-badge">DEMO ENVIRONMENT / サンプルデータ</div>
+</div>
+<div class="grad-line"></div>
+
+<div class="wrap">
+
+  <!-- ===== 入力画面 ===== -->
+  <div id="view-input">
+    <div class="pagehead">
+      <div class="eyebrow">NEW PROJECT</div>
+      <h1>ヒアリングから、企画書ドラフトを生成する</h1>
+      <p class="sub">商談の文字起こしを読み込み、案件カルテへの構造化とドラフト作成を行います。</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card pad">
+        <div class="field">
+          <div class="label"><span class="step">STEP 1</span>案件情報</div>
+          <div class="row2" style="margin-bottom:12px">
+            <input type="text" id="f-client" value="株式会社ミライフーズ">
+            <input type="text" id="f-industry" value="食品／冷凍宅配食">
+          </div>
+          <div class="row2">
+            <input type="text" id="f-due" value="提案期限：2026-08-20">
+            <input type="text" id="f-owner" value="担当：営業2部">
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label"><span class="step">STEP 2</span>入力ソース</div>
+          <div class="filechips">
+            <span class="chip">オリエン議事録_0715.txt</span>
+            <span class="chip">商談録音_0715.m4a（文字起こし済）</span>
+            <span class="chip n">先方配布オリエンシート.pdf</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label"><span class="step">STEP 3</span>出力する型</div>
+          <select id="f-format">
+            <option>ADOP標準｜ブランド立ち上げ提案フォーマット</option>
+            <option>ADOP標準｜キャンペーン単発提案フォーマット</option>
+            <option>ADOP標準｜年間パートナー提案フォーマット</option>
+          </select>
+        </div>
+
+        <button class="btn" id="btn-generate">ドラフトを生成する</button>
+        <p class="hint">デモ環境のため、生成結果はサンプル案件のものが表示されます。</p>
+      </div>
+
+      <div class="card pad">
+        <div class="label">文字起こし（編集可）</div>
+        <textarea id="f-transcript"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 結果画面 ===== -->
+  <div id="view-result" style="display:none">
+    <div class="pagehead">
+      <div class="eyebrow">GENERATED</div>
+      <h1>まいにちデリ 立ち上げコミュニケーション企画</h1>
+      <p class="sub">株式会社ミライフーズ ／ ADOP標準・ブランド立ち上げ提案フォーマット</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" data-p="karte">案件カルテ</button>
+      <button class="tab" data-p="draft">企画書ドラフト</button>
+      <button class="tab" data-p="gap">ヒアリング充足チェック<span class="badge">4</span></button>
+      <button class="tab" data-p="list">案件カルテ一覧</button>
+    </div>
+
+    <!-- カルテ -->
+    <div class="panel on" id="p-karte">
+      <div class="grid2">
+        <div class="card pad" style="order:2">
+          <div class="label">カルテの状態</div>
+          <div class="summary">
+            <div>必須項目の充足率<b>75%</b></div>
+            <div>抽出所要<b>42秒</b></div>
+          </div>
+          <div class="alert ok">
+            <div class="t">検証済み</div>
+            <div class="q">すべての抽出項目に発言箇所が紐づいています。<strong>原文にない内容は生成されません。</strong></div>
+          </div>
+          <div class="alert">
+            <div class="t">要確認 2件</div>
+            <div class="q">決裁プロセスと媒体の制約が未取得です。ドラフトは生成できますが、費用配分の精度が下がります。</div>
+          </div>
+          <div class="note">カルテは案件ごとに保存され、<b>過去案件の検索・再利用</b>の単位になります。</div>
+        </div>
+        <div class="card pad" style="order:1">
+          <div class="label">抽出結果（出典つき）</div>
+          <table id="t-karte"><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ドラフト -->
+    <div class="panel" id="p-draft">
+      <div class="card pad">
+        <div class="summary">
+          <div>生成ページ数<b>A4換算 11ページ</b></div>
+          <div>生成時間<b>1分48秒</b></div>
+          <div>本文の裏付け<b>全文にカルテ紐付け</b></div>
+        </div>
+        <div class="draft">
+          <div>
+            <div class="label">構成</div>
+            <ul class="toc" id="toc"></ul>
+          </div>
+          <div class="doc" id="doc"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 不足 -->
+    <div class="panel" id="p-gap">
+      <div class="grid2">
+        <div class="card pad">
+          <div class="label">次回ヒアリングで確認すべき項目</div>
+          <div id="gaps"></div>
+        </div>
+        <div class="card pad">
+          <div class="label">なぜ指摘できるのか</div>
+          <p class="sub" style="line-height:1.8">ADOPの<b style="color:var(--primary)">過去の受注案件から抽出した必須項目リスト</b>と、今回のヒアリング内容を突き合わせているためです。</p>
+          <div class="alert ok" style="margin-top:20px">
+            <div class="t">この機能の位置づけ</div>
+            <div class="q">ドラフトの自動生成は他ツールでも可能です。<br><br>自社の型に照らして<strong>「何が足りないか」</strong>を指摘できるのは、御社のノウハウを持ったエージェントだけです。</div>
+          </div>
+          <div class="note">経験の浅いメンバーでも、ベテランと同じ確認項目を持って商談に臨めます。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 一覧 -->
+    <div class="panel" id="p-list">
+      <div class="card pad">
+        <div class="label">全社ナレッジ｜案件カルテ一覧</div>
+        <div class="search"><span>検索</span><input type="text" id="q" value="共働き世帯 食品 認知" placeholder="キーワードで過去案件を検索"></div>
+        <div class="hit" id="hit"></div>
+        <table><thead><tr><th style="width:90px">時期</th><th>案件</th><th style="width:110px">予算</th><th style="width:170px">採用した型</th><th style="width:80px">結果</th></tr></thead><tbody id="t-list"></tbody></table>
+        <div class="note">失注案件も残すことで、<b>効かなかった型</b>が次の判断材料になります。揃えるべきは企画書のテンプレートではなく、カルテの項目定義です。</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <button class="btn ghost sm" id="btn-back">入力画面に戻る</button>
+      <button class="btn sm" id="btn-again">もう一度生成する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 生成中オーバーレイ ===== -->
+<div class="gen" id="gen">
+  <div class="gen-inner">
+    <div class="gen-title">ドラフトを生成しています</div>
+    <div id="gsteps"></div>
+    <div class="bar"><i id="barfill"></i></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   デモ用データ（すべてサンプル）
+   ========================================================= */
+const TRANSCRIPT = `[00:03:12] 先方・宣伝部 田中様
+10月に立ち上げる冷凍宅配食の新ブランドについてご相談です。社内では「まいにちデリ」という名称で進んでいます。
+
+[00:05:40] 先方・宣伝部 田中様
+ターゲットは30〜40代の共働き世帯です。ただ、実際に定期購入まで進むのは40代が多くて、そこは社内でも議論があります。
+
+[00:09:15] 弊社・営業 佐藤
+現状、認知はどの程度取れている状況でしょうか。
+
+[00:09:33] 先方・宣伝部 田中様
+まだゼロに近いです。ブランド自体が新規なので、まず知ってもらうところからになります。
+
+[00:11:25] 弊社・営業 佐藤
+予算感はどのくらいで見ておけばよろしいでしょうか。
+
+[00:11:48] 先方・宣伝部 田中様
+2,500万円前後です。効果が見えれば1月以降の追加もありえます。
+
+[00:19:02] 先方・宣伝部 田中様
+競合が価格訴求で強くて、うちは同じ土俵には乗りたくないと考えています。
+
+[00:24:30] 先方・宣伝部 田中様
+初年度の初回購入者は12,000人を目標に置いています。
+
+[00:31:07] 先方・宣伝部 田中様
+制作物は10月頭には出稿したいので、9月中旬までに素材を固めたいですね。`;
+
+const KARTE = [
+  ['案件名','新ブランド「まいにちデリ」立ち上げプロモーション','00:03:12',0],
+  ['実施時期','2026年10月〜12月（1月以降に第2弾の可能性）','00:03:12',0],
+  ['ターゲット','30〜40代 共働き世帯／実購入層は40代寄りとの認識ズレあり','00:05:40',0],
+  ['現状認知','ほぼゼロ。新規ブランドのため認知獲得が起点','00:09:33',0],
+  ['予算','2,500万円前後（追加余地あり）','00:11:48',0],
+  ['競合状況','競合は価格訴求。同一軸での競合は避けたい意向','00:19:02',0],
+  ['KPI','初回購入者 12,000人／初年度','00:24:30',0],
+  ['制作進行','9月中旬に素材確定、10月頭出稿','00:31:07',0],
+  ['決裁プロセス','未取得','—',1],
+  ['媒体の制約','未取得','—',1]
+];
+
+const SECTIONS = [
+  {n:'01',t:'課題の再定義',body:[
+    ['h','1-1. ご相談内容の整理'],
+    ['p','本件のご相談は「新ブランドの認知獲得」として提示されました。ヒアリングを踏まえると、真の課題は【価格以外の選択理由が市場に存在していないこと】にあると考えます。'],
+    ['h','1-2. 現状認識'],
+    ['p','冷凍宅配食カテゴリーは競合各社が価格訴求を強め、比較軸が単価に一元化しています。この状況で新規参入が同じ軸に乗ることは、立ち上げ期の予算規模から見て不利に働きます。'],
+    ['h','1-3. 論点の転換'],
+    ['p','したがって本提案では、訴求軸を「安さ」から【共働き世帯の平日夜をどう変えるか】という生活時間の文脈へ転換することを起点とします。']
+  ]},
+  {n:'02',t:'ターゲットとインサイト',body:[
+    ['h','2-1. ターゲット設定の再検討'],
+    ['p','ご提示は30〜40代の共働き世帯ですが、定期購入への転換は40代が中心とのご認識をうかがいました。獲得効率と将来のLTVは同じ層では最大化しません。'],
+    ['h','2-2. 二層構造での設計'],
+    ['p','立ち上げ期は【40代・時間制約が最も強い層】を初回購入の主戦場に置き、30代へはブランド認知の投資として並行接触する二層構造を推奨します。'],
+    ['h','2-3. コアインサイト'],
+    ['p','「手を抜いたと思われたくない」——共働き世帯が時短商材を選ぶ際の最大の障壁は、価格ではなく罪悪感です。ここを解除できるブランドが選ばれます。']
+  ]},
+  {n:'03',t:'コミュニケーションコンセプト',body:[
+    ['h','3-1. コンセプト'],
+    ['p','【手を抜いたんじゃない、時間をつくったんだ。】'],
+    ['h','3-2. 意図'],
+    ['p','時短の言い換えではなく、可処分時間の再定義として提示します。価格比較の土俵から降り、生活価値の軸で第一想起を取りにいきます。']
+  ]},
+  {n:'04',t:'施策プラン',body:[
+    ['h','4-1. フェーズ設計'],
+    ['p','10月：認知の一気立ち上げ／11月：比較検討層の刈り取り／12月：定期転換とUGC醸成。'],
+    ['h','4-2. 媒体構成（案）'],
+    ['p','デジタル動画を中核に、生活時間帯のターゲティング配信とリテールメディアを組み合わせます。※媒体の制約が未取得のため、確定にはヒアリングが必要です。']
+  ]},
+  {n:'05',t:'クリエイティブ方向性',body:[
+    ['h','5-1. 表現の方向'],
+    ['p','調理シーンではなく、生まれた時間の使い道を描きます。商品カットは後半に配置し、前半は生活の変化に振り切ります。']
+  ]},
+  {n:'06',t:'体制・スケジュール',body:[
+    ['h','6-1. 制作進行'],
+    ['p','9月中旬の素材確定から逆算し、8月下旬に絵コンテ確定、9月上旬に撮影を設定します。']
+  ]},
+  {n:'07',t:'概算費用とKPI',body:[
+    ['h','7-1. 予算配分（概算）'],
+    ['p','総額2,500万円に対し、媒体費60％・制作費30％・効果測定10％を想定しています。'],
+    ['h','7-2. KPI'],
+    ['p','初回購入者12,000人に対し、認知率・サイト来訪・初回転換率の三段で中間指標を設定します。']
+  ]}
+];
+
+const GAPS = [
+  ['決裁プロセスが未確認','今回のご提案は、宣伝部長様のご判断で進められますか。役員会の承認が必要な場合、そのタイミングをうかがえますか。'],
+  ['既存顧客データの利用可否','既存のCRMデータを施策に活用することは可能でしょうか。可否によって獲得単価の前提が変わります。'],
+  ['効果測定の定義が曖昧','「初回購入者12,000人」は、どの計測ツールの数値を確定値とされますか。'],
+  ['クリエイティブの制約','ブランドガイドラインやNG表現の規定はございますか。過去の制作物でお使いのトンマナがあれば拝見したいです。']
+];
+
+const PAST = [
+  ['2025.11','A社／冷凍惣菜 新商品PR','2,000万円','インサイト転換型','win','共働き 食品 認知 冷凍'],
+  ['2025.06','B社／ミールキット ブランド刷新','3,200万円','価格比較回避型','lose','共働き 食品 ブランド 認知'],
+  ['2024.09','C社／宅配水 定期購入獲得','1,800万円','習慣化訴求型','win','共働き 定期 認知 宅配'],
+  ['2025.03','D社／オフィス向け軽食サービス','950万円','法人BtoB型','win','法人 食品 認知'],
+  ['2024.12','E社／地方物産 EC送客','1,200万円','産地ストーリー型','lose','食品 EC 認知'],
+  ['2025.08','F社／アパレル 新ライン立ち上げ','2,800万円','インサイト転換型','win','アパレル ブランド 認知'],
+  ['2024.05','G社／保険 資料請求獲得','1,500万円','不安解消型','lose','金融 獲得'],
+  ['2025.01','H社／家事代行 会員獲得','2,100万円','時間価値訴求型','win','共働き 時間 獲得 認知']
+];
+
+const GSTEPS = [
+  ['発言の構造化（案件カルテ抽出）','42秒',1400],
+  ['ADOP標準フォーマットとの照合','18秒',1100],
+  ['ヒアリング充足チェック','11秒',900],
+  ['章立ての決定','24秒',1000],
+  ['本文の生成','1分48秒',1800]
+];
+
+/* =========================================================
+   画面制御
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+$('#f-transcript').value = TRANSCRIPT;
+
+/* --- 生成アニメーション --- */
+function runGeneration(){
+  const box = $('#gsteps'); box.innerHTML = '';
+  GSTEPS.forEach((s,i)=>{
+    const el = document.createElement('div');
+    el.className = 'gstep'; el.id = 'gs'+i;
+    el.innerHTML = '<span class="dot">✓</span><span class="t">'+s[0]+'</span><span class="ms">'+s[1]+'</span>';
+    box.appendChild(el);
+  });
+  $('#gen').classList.add('on');
+  $('#barfill').style.width = '0%';
+
+  let i = 0;
+  const total = GSTEPS.length;
+  const tick = () => {
+    if(i > 0) { const p = $('#gs'+(i-1)); p.classList.remove('run'); p.classList.add('done'); }
+    if(i === total){
+      $('#barfill').style.width = '100%';
+      setTimeout(()=>{ $('#gen').classList.remove('on'); showResult(); }, 500);
+      return;
+    }
+    $('#gs'+i).classList.add('run');
+    $('#barfill').style.width = Math.round((i/total)*100)+'%';
+    const wait = GSTEPS[i][2]; i++;
+    setTimeout(tick, wait);
+  };
+  setTimeout(tick, 400);
+}
+
+/* --- 結果描画 --- */
+function showResult(){
+  $('#view-input').style.display = 'none';
+  $('#view-result').style.display = 'block';
+  window.scrollTo(0,0);
+  renderKarte(); renderToc(); renderGaps(); renderList();
+  switchPanel('karte');
+  openSection(0);
+}
+
+function renderKarte(){
+  const tb = $('#t-karte tbody');
+  tb.innerHTML = '<tr><th>項目</th><th>抽出内容</th><th>出典</th></tr>';
+  KARTE.forEach(r=>{
+    const tr = document.createElement('tr');
+    if(r[3]) tr.className = 'miss';
+    tr.innerHTML = '<td class="k">'+r[0]+'</td><td class="'+(r[3]?'na':'')+'">'+r[1]+'</td><td class="src">'+r[2]+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function renderToc(){
+  const ul = $('#toc'); ul.innerHTML = '';
+  SECTIONS.forEach((s,i)=>{
+    const li = document.createElement('li');
+    li.innerHTML = '<b>'+s.n+'</b><span>'+s.t+'</span>';
+    li.onclick = ()=>openSection(i);
+    ul.appendChild(li);
+  });
+}
+
+let typeTimer = null;
+function openSection(idx){
+  $$('#toc li').forEach((li,i)=>li.classList.toggle('on', i===idx));
+  const s = SECTIONS[idx];
+  const doc = $('#doc');
+  doc.innerHTML = '<h3>'+s.n+'. '+s.t+'</h3>';
+  if(typeTimer) clearTimeout(typeTimer);
+
+  // 本文はタイプライター表示（生成されている感を出す）
+  let bi = 0;
+  const nextBlock = ()=>{
+    if(bi >= s.body.length) return;
+    const [kind, text] = s.body[bi];
+    if(kind === 'h'){
+      const h = document.createElement('h4'); h.textContent = text; doc.appendChild(h);
+      bi++; typeTimer = setTimeout(nextBlock, 120); return;
+    }
+    const p = document.createElement('p');
+    doc.appendChild(p);
+    let ci = 0;
+    const typeChar = ()=>{
+      ci += 3;
+      const shown = text.slice(0, ci);
+      p.innerHTML = shown.replace(/【([^】]*)】/g,'<span class="mk">$1</span>') +
+        (ci < text.length ? '<span class="caret"></span>' : '');
+      if(ci < text.length){ typeTimer = setTimeout(typeChar, 16); }
+      else { bi++; typeTimer = setTimeout(nextBlock, 160); }
+    };
+    typeChar();
+  };
+  nextBlock();
+}
+
+function renderGaps(){
+  const box = $('#gaps'); box.innerHTML = '';
+  GAPS.forEach(g=>{
+    const d = document.createElement('div');
+    d.className = 'alert';
+    d.innerHTML = '<div class="t">'+g[0]+'</div><div class="q"><em>推奨質問：</em>'+g[1]+'</div>';
+    box.appendChild(d);
+  });
+}
+
+function renderList(){
+  const q = $('#q').value.trim();
+  const words = q.split(/[\s　]+/).filter(Boolean);
+  const rows = PAST.filter(r=>{
+    if(!words.length) return true;
+    const hay = r[1]+' '+r[3]+' '+r[5];
+    return words.some(w=>hay.includes(w));
+  });
+  $('#hit').textContent = q ? ('類似案件 '+rows.length+'件／全'+PAST.length+'件') : ('全'+PAST.length+'件');
+  const tb = $('#t-list'); tb.innerHTML = '';
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+r[0]+'</td><td class="k" style="width:auto">'+r[1]+'</td><td>'+r[2]+'</td>'+
+      '<td><span class="tag">'+r[3]+'</span></td>'+
+      '<td><span class="pill '+r[4]+'">'+(r[4]==='win'?'受注':'失注')+'</span></td>';
+    tb.appendChild(tr);
+  });
+}
+
+function switchPanel(name){
+  $$('.tab').forEach(t=>t.classList.toggle('on', t.dataset.p===name));
+  $$('.panel').forEach(p=>p.classList.toggle('on', p.id==='p-'+name));
+  if(name==='draft') openSection([...$$('#toc li')].findIndex(li=>li.classList.contains('on')) < 0 ? 0 : [...$$('#toc li')].findIndex(li=>li.classList.contains('on')));
+}
+
+/* --- イベント --- */
+$('#btn-generate').onclick = runGeneration;
+$('#btn-again').onclick = ()=>{ window.scrollTo(0,0); runGeneration(); };
+$('#btn-back').onclick = ()=>{ $('#view-result').style.display='none'; $('#view-input').style.display='block'; window.scrollTo(0,0); };
+$$('.tab').forEach(t=>t.onclick = ()=>switchPanel(t.dataset.p));
+$('#q').oninput = renderList;
+</script>
+</body>
+</html>
