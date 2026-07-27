@@ -123,6 +123,53 @@ td.na{color:var(--danger);font-weight:700}
 .pill.lose{background:var(--n9);color:var(--n3)}
 .tag{display:inline-block;font-size:11.5px;background:var(--primary-9);color:var(--primary);border-radius:6px;padding:3px 9px;margin:2px 4px 2px 0}
 .foot{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+
+/* ---------- スライドプレビュー ---------- */
+.thumbs{display:flex;flex-wrap:wrap;gap:20px}
+.thumb-wrap{width:264px}
+.thumb{width:264px;height:148.5px;overflow:hidden;border:1px solid var(--n8);border-radius:8px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.thumb:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.thumb .sld{transform:scale(.275);transform-origin:top left}
+.thumb-cap{font-size:12px;color:var(--n3);margin-top:8px;line-height:1.5}
+.thumb-cap b{color:var(--n0)}
+.sld{width:960px;height:540px;background:#fff;position:relative;padding:52px 60px;overflow:hidden;color:#1F2430;font-family:var(--font)}
+.sld .no{position:absolute;bottom:22px;right:32px;font-size:13px;color:#A8AEB9}
+.sld .tpl{position:absolute;bottom:22px;left:60px;font-size:11px;color:#C7CCD5;letter-spacing:.12em}
+.sld h2{font-size:38px;margin:0;letter-spacing:-.02em;line-height:1.32}
+.sld .rule{width:60px;height:5px;background:var(--primary);margin:16px 0 24px}
+.sld .lead{font-size:19px;color:#4A5262;line-height:1.75;margin:0 0 22px}
+.sld ul{margin:0;padding:0;list-style:none}
+.sld li{font-size:18px;line-height:1.7;color:#3A4150;padding-left:24px;position:relative;margin-bottom:13px}
+.sld li:before{content:'';position:absolute;left:0;top:13px;width:12px;height:2px;background:var(--primary)}
+.sld.cover{background:#1F2430;color:#fff;padding:0}
+.sld.cover .cbar{height:8px;background:var(--grad)}
+.sld.cover .cbody{padding:96px 60px 0}
+.sld.cover .ceye{font-size:13px;letter-spacing:.2em;color:#FF8A8A;margin-bottom:22px}
+.sld.cover h2{font-size:46px;color:#fff}
+.sld.cover .cmeta{margin-top:56px;font-size:16px;color:#AEB4C0;line-height:2}
+.sld .cols{display:flex;gap:22px}
+.sld .col{flex:1;border:1px solid #E3E6EB;border-radius:12px;padding:22px 24px}
+.sld .col .ct{font-size:12px;letter-spacing:.1em;color:var(--primary);font-weight:700;margin-bottom:8px}
+.sld .col h3{font-size:22px;margin:0 0 10px}
+.sld .col p{font-size:15px;line-height:1.7;color:#4A5262;margin:0}
+.sld .big{font-size:46px;font-weight:700;line-height:1.5;letter-spacing:-.02em}
+.sld .bigsub{font-size:17px;color:#4A5262;line-height:1.8;margin-top:28px}
+.sld .ph{background:#F1F3F6;border:1px dashed #C7CCD5;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#9AA0AB;font-size:14px;text-align:center;line-height:1.6;flex:1}
+.sld .phrow{display:flex;gap:20px;height:210px;margin-bottom:18px}
+.sld .costbar{display:flex;height:46px;border-radius:8px;overflow:hidden;margin-bottom:14px}
+.sld .costbar i{display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;font-style:normal}
+.sld .kpis{display:flex;gap:18px;margin-top:26px}
+.sld .kpi{flex:1;background:#F7F8FA;border-radius:10px;padding:18px 20px}
+.sld .kpi .kl{font-size:12px;color:#8A919E;letter-spacing:.08em}
+.sld .kpi .kv{font-size:26px;font-weight:700;margin-top:6px}
+.sld .warn{position:absolute;bottom:60px;left:60px;font-size:13px;color:#B08900;background:#FFF8E1;border-radius:6px;padding:8px 14px}
+.modal{position:fixed;inset:0;background:rgba(31,36,48,.86);z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+.modal.on{display:flex}
+.modal-stage{background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.modal-nav{display:flex;align-items:center;gap:18px;color:#fff;font-size:14px}
+.modal-nav button{background:rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:700}
+.modal-nav button:hover{background:rgba(255,255,255,.28)}
+
 @media (max-width:900px){.grid2,.draft{grid-template-columns:1fr}}
 </style>
 </head>
@@ -200,6 +247,7 @@ td.na{color:var(--danger);font-weight:700}
     <div class="tabs">
       <button class="tab on" data-p="karte">案件カルテ</button>
       <button class="tab" data-p="draft">企画書ドラフト</button>
+      <button class="tab" data-p="slides">スライドプレビュー</button>
       <button class="tab" data-p="gap">ヒアリング充足チェック<span class="badge">4</span></button>
       <button class="tab" data-p="list">案件カルテ一覧</button>
     </div>
@@ -242,9 +290,24 @@ td.na{color:var(--danger);font-weight:700}
           <div>
             <div class="label">構成</div>
             <ul class="toc" id="toc"></ul>
+            <button class="btn sm" id="btn-export" style="margin-top:18px;width:100%">スライドに書き出す</button>
           </div>
           <div class="doc" id="doc"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- スライドプレビュー -->
+    <div class="panel" id="p-slides">
+      <div class="card pad">
+        <div class="summary">
+          <div>生成スライド<b>8枚</b></div>
+          <div>適用テンプレート<b>ADOP標準</b></div>
+          <div>状態<b>デザイン未仕上げ</b></div>
+        </div>
+        <div class="label">クリックすると拡大します</div>
+        <div class="thumbs" id="thumbs"></div>
+        <div class="note">自動生成されるのは<b>構成とレイアウトの骨格まで</b>です。ビジュアルの選定とデザインの仕上げは、これまでどおり制作チームの仕事として残ります。<br>AIが引き受けるのは「白紙から組み立てる時間」であって、「良し悪しを判断する仕事」ではありません。</div>
       </div>
     </div>
 
@@ -282,6 +345,16 @@ td.na{color:var(--danger);font-weight:700}
       <button class="btn ghost sm" id="btn-back">入力画面に戻る</button>
       <button class="btn sm" id="btn-again">もう一度生成する</button>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-stage" id="modal-stage"></div>
+  <div class="modal-nav">
+    <button id="m-prev">← 前へ</button>
+    <span id="m-count"></span>
+    <button id="m-next">次へ →</button>
+    <button id="m-close">閉じる</button>
   </div>
 </div>
 
@@ -541,8 +614,111 @@ function renderList(){
 function switchPanel(name){
   $$('.tab').forEach(t=>t.classList.toggle('on', t.dataset.p===name));
   $$('.panel').forEach(p=>p.classList.toggle('on', p.id==='p-'+name));
+  if(name==='slides') renderSlides();
   if(name==='draft') openSection([...$$('#toc li')].findIndex(li=>li.classList.contains('on')) < 0 ? 0 : [...$$('#toc li')].findIndex(li=>li.classList.contains('on')));
 }
+
+
+/* ---- スライドプレビュー用データ ---- */
+const SLIDES = [
+  {t:'cover', title:'まいにちデリ<br>立ち上げコミュニケーション企画', meta:'株式会社ミライフーズ 御中<br>2026年8月20日　株式会社アドップ', cap:'表紙'},
+  {t:'std', title:'ご相談内容と、私たちの課題認識', lead:'ご相談は「新ブランドの認知獲得」。ただし、真の課題は別のところにあると考えます。',
+   items:['冷凍宅配食カテゴリーは比較軸が単価に一元化している','新規参入が同じ軸に乗ることは予算規模から見て不利','課題は認知量ではなく、価格以外の選択理由が存在しないこと'], cap:'課題の再定義'},
+  {t:'two', title:'ターゲットは二層構造で設計します', lead:'獲得効率と将来のLTVは、同じ層では最大化しません。',
+   cols:[{ct:'PHASE 1 / 主戦場',h:'40代・時間制約層',p:'定期購入への転換率が高く、立ち上げ期の初回購入を担う中心層。'},
+         {ct:'PHASE 2 / 認知投資',h:'30代・共働き層',p:'いま刈り取るのではなく、翌年以降の母数として認知を積む対象。'}], cap:'ターゲット'},
+  {t:'big', title:'コアインサイト', big:'「手を抜いたと<br>思われたくない」', sub:'共働き世帯が時短商材を選ぶ際の最大の障壁は、価格ではなく罪悪感です。<br>この障壁を解除できたブランドが、第一想起を取ります。', cap:'インサイト'},
+  {t:'big', title:'コミュニケーションコンセプト', big:'手を抜いたんじゃない、<br>時間をつくったんだ。', sub:'時短の言い換えではなく、可処分時間の再定義として提示します。価格比較の土俵から降り、生活価値の軸で勝負します。', cap:'コンセプト'},
+  {t:'phase', title:'3か月のフェーズ設計', lead:'認知 → 検討 → 定期転換を、月次で切り分けて設計します。',
+   phases:[{m:'10月',h:'認知の立ち上げ',p:'デジタル動画を中核に一気に接触量を確保'},
+           {m:'11月',h:'比較検討層の刈り取り',p:'検索・リテールメディアで初回購入へ誘導'},
+           {m:'12月',h:'定期転換とUGC',p:'継続利用者の声を素材化し翌年へ接続'}], cap:'施策プラン'},
+  {t:'visual', title:'クリエイティブ方向性', lead:'調理シーンではなく、生まれた時間の使い道を描きます。', cap:'クリエイティブ'},
+  {t:'cost', title:'予算配分とKPI', lead:'総額2,500万円に対する配分の考え方と、中間指標の設計です。', cap:'費用・KPI'}
+];
+
+function slideHTML(s, i){
+  const foot = '<div class="tpl">ADOP STANDARD FORMAT</div><div class="no">'+String(i+1).padStart(2,'0')+'</div>';
+  if(s.t==='cover'){
+    return '<div class="cbar"></div><div class="cbody"><div class="ceye">PROPOSAL</div><h2>'+s.title+'</h2>'+
+           '<div class="cmeta">'+s.meta+'</div></div>';
+  }
+  let inner = '<h2>'+s.title+'</h2><div class="rule"></div>';
+  if(s.lead) inner += '<p class="lead">'+s.lead+'</p>';
+  if(s.t==='std'){
+    inner += '<ul>'+s.items.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+  } else if(s.t==='two'){
+    inner += '<div class="cols">'+s.cols.map(c=>'<div class="col"><div class="ct">'+c.ct+'</div><h3>'+c.h+'</h3><p>'+c.p+'</p></div>').join('')+'</div>';
+  } else if(s.t==='big'){
+    inner += '<div class="big">'+s.big+'</div><div class="bigsub">'+s.sub+'</div>';
+  } else if(s.t==='phase'){
+    inner += '<div class="cols">'+s.phases.map(c=>'<div class="col"><div class="ct">'+c.m+'</div><h3>'+c.h+'</h3><p>'+c.p+'</p></div>').join('')+'</div>';
+  } else if(s.t==='visual'){
+    inner += '<div class="phrow"><div class="ph">ビジュアル案 A<br><span style="font-size:12px">帰宅後の食卓／余白のある時間</span></div>'+
+             '<div class="ph">ビジュアル案 B<br><span style="font-size:12px">商品カットは後半に配置</span></div></div>'+
+             '<div class="warn">ビジュアルは未確定です。制作チームでの選定・撮影が必要です。</div>';
+  } else if(s.t==='cost'){
+    inner += '<div class="costbar"><i style="flex:6;background:#A51E6D">媒体費 60%</i><i style="flex:3;background:#039578">制作費 30%</i><i style="flex:1;background:#8A919E">測定 10%</i></div>'+
+             '<div class="kpis"><div class="kpi"><div class="kl">認知率</div><div class="kv">未設定</div></div>'+
+             '<div class="kpi"><div class="kl">サイト来訪</div><div class="kv">未設定</div></div>'+
+             '<div class="kpi"><div class="kl">初回購入者</div><div class="kv">12,000人</div></div></div>'+
+             '<div class="warn" style="bottom:52px">中間指標は、効果測定の定義を確認のうえ設定します。</div>';
+  }
+  return inner + foot;
+}
+
+function renderSlides(){
+  const box = document.querySelector('#thumbs');
+  if(box.dataset.done) return;
+  box.innerHTML = '';
+  SLIDES.forEach((s,i)=>{
+    const w = document.createElement('div'); w.className = 'thumb-wrap';
+    const t = document.createElement('div'); t.className = 'thumb';
+    const sl = document.createElement('div'); sl.className = 'sld' + (s.t==='cover'?' cover':'');
+    sl.innerHTML = slideHTML(s,i);
+    t.appendChild(sl);
+    t.onclick = ()=>openModal(i);
+    const cap = document.createElement('div'); cap.className = 'thumb-cap';
+    cap.innerHTML = '<b>'+String(i+1).padStart(2,'0')+'</b>　'+s.cap;
+    w.appendChild(t); w.appendChild(cap); box.appendChild(w);
+  });
+  box.dataset.done = '1';
+}
+
+let mIdx = 0;
+function openModal(i){
+  mIdx = (i + SLIDES.length) % SLIDES.length;
+  const s = SLIDES[mIdx];
+  const scale = Math.min(1, (window.innerWidth - 96) / 960, (window.innerHeight - 190) / 540);
+  const stage = document.querySelector('#modal-stage');
+  stage.style.width = (960*scale)+'px';
+  stage.style.height = (540*scale)+'px';
+  stage.innerHTML = '<div class="sld'+(s.t==='cover'?' cover':'')+'" style="transform:scale('+scale+');transform-origin:top left">'+slideHTML(s,mIdx)+'</div>';
+  document.querySelector('#m-count').textContent = (mIdx+1)+' / '+SLIDES.length;
+  document.querySelector('#modal').classList.add('on');
+}
+function closeModal(){ document.querySelector('#modal').classList.remove('on'); }
+document.querySelector('#m-prev').onclick = ()=>openModal(mIdx-1);
+document.querySelector('#m-next').onclick = ()=>openModal(mIdx+1);
+document.querySelector('#m-close').onclick = closeModal;
+document.querySelector('#modal').onclick = e => { if(e.target.id === 'modal') closeModal(); };
+window.addEventListener('keydown', e=>{
+  if(!document.querySelector('#modal').classList.contains('on')) return;
+  if(e.key==='ArrowRight') openModal(mIdx+1);
+  if(e.key==='ArrowLeft') openModal(mIdx-1);
+  if(e.key==='Escape') closeModal();
+});
+
+/* スライド書き出しボタン */
+document.querySelector('#btn-export').onclick = function(){
+  const b = this;
+  b.disabled = true; b.textContent = 'レイアウトに流し込み中…';
+  setTimeout(()=>{
+    b.disabled = false; b.textContent = 'スライドに書き出す';
+    switchPanel('slides');
+    window.scrollTo(0,0);
+  }, 1600);
+};
 
 /* --- イベント --- */
 $('#btn-generate').onclick = runGeneration;
